@@ -7,7 +7,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Profile("producer-book")
 @Service
@@ -30,7 +29,7 @@ public class BookProducer {
     }
 
     private Book getRandomBook(){
-        int randomInt = ThreadLocalRandom.current().nextInt(0, books.size());
+        int randomInt = Utils.random(0, books.size());
         return books.get(randomInt);
     }
 
