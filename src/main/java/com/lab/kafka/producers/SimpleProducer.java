@@ -1,5 +1,6 @@
-package com.lab.kafka;
+package com.lab.kafka.producers;
 
+import com.lab.kafka.Utils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,7 @@ public class SimpleProducer {
     private void produceMessages() {
         new Thread(() -> {
             for(;;) {
-                try {
-                    Thread.sleep(1_000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Utils.sleep(1_000);
                 this.send("Message " + UUID.randomUUID());
             }
         }).start();
