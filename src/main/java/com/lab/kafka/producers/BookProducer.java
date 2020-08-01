@@ -40,7 +40,7 @@ public class BookProducer {
         bookProducer.send("book-topic", book);
     }
 
-    private List<Book> books = List.of(
+    private final List<Book> books = List.of(
             Book.create("Die Verwandlung", "Franz", "Kafka"),
             Book.create("Foundation", "Isaac", "Asimov"),
             Book.create("Lord of the Rings", "J.R.R.", "Tolkien"),

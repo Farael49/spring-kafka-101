@@ -8,10 +8,15 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;
 import org.springframework.util.backoff.FixedBackOff;
+
+import java.util.Optional;
 
 @Profile("book-consumer")
 @Service
@@ -51,9 +56,15 @@ public class BookConsumer {
 
     /**
      * A second consumer, this one is made to process the DLT
+     * We also show how to get the headers, to display the DLT exception msg
+     * Another option is to directly get the header we're interested in
+     * "@Header(KafkaHeaders.DLT_EXCEPTION_MESSAGE) String msg"
      */
     @KafkaListener(id = "dlt-consumer", topics = "book-topic.DLT")
-    public void dltListener(String dl) {
-        System.out.println("[DLT] Got message: " + dl);
+    public void dltListener(String dl, @Headers MessageHeaders messageHeaders) {
+        String exceptionMsg = Optional.ofNullable(messageHeaders.get(KafkaHeaders.DLT_EXCEPTION_MESSAGE))
+                .map(msg -> new String((byte[]) msg))
+                .orElse(Utils.EMPTY);
+        System.out.println(String.format("[DLT] Got message %s with exception %s", dl, exceptionMsg));
     }
 }

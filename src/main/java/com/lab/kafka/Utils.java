@@ -4,7 +4,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Utils {
 
-    //ignore exception handling for teh poc, never do this on prod :)
+    public static final String EMPTY = "";
+
+    //ignore exception handling for the poc, never do this on prod :)
     public static void sleep(int millis) {
         try {
             Thread.sleep(millis);
