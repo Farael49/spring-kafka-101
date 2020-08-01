@@ -13,25 +13,47 @@ import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.backoff.FixedBackOff;
 
-@Profile("consumer-book")
+@Profile("book-consumer")
 @Service
 public class BookConsumer {
 
+    /**
+     * Converter to allow Objects in the consumer, mapped from JSON
+     * Can also be configured with the application properties (see example in resources)
+     */
     @Bean
     public RecordMessageConverter converter() {
         return new StringJsonMessageConverter();
     }
 
+    /**
+     * Configure the "DLT" Dead Letter Topic
+     * by default the resolver will add ".DLT" to the topic we had an exception with
+     * For some reason, with maxAttempts=0 we don't see the exception's stracktrace but it properly enters the DLT on first issue
+     * However a real world case should -probably- always use a maxAttempt > 0
+     */
     @Bean
     public SeekToCurrentErrorHandler errorHandler(KafkaOperations<Object, Object> template) {
         return new SeekToCurrentErrorHandler(
-                new DeadLetterPublishingRecoverer(template), new FixedBackOff(1000L, 1));
+                new DeadLetterPublishingRecoverer(template), new FixedBackOff(1_000, 0));
     }
 
-    @KafkaListener(id = "book-consumer", topics = "book-message")
+    /**
+     * A basic consumer, expecting a Book object, and randomly encountering an issue to showcase the DLT
+     */
+    @KafkaListener(id = "book-consumer", topics = "book-topic")
     public void consumeMessage(Book book) {
-        if (Utils.random(0, 10) == 0)
+        boolean triggerRandomError = Utils.random(0, 10) == 0;
+        if (triggerRandomError)
             throw new IllegalArgumentException("Fake exception to populate the DLQ " + book.toString());
-        System.out.println("Got message: " + book);
+        System.out.println("[BOOK-CONSUMER] Got message: " + book);
+    }
+
+    /**
+     * A second consumer, this one is made to process the DLT
+     */
+    @KafkaListener(id = "dlt-consumer", topics = "book-topic.DLT")
+    public void dltListener(String dl) {
+        System.out.println("[DLT] Got message: " + dl);
     }
 }

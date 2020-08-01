@@ -7,35 +7,37 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-@Profile("producer-book")
+@Profile("book-producer")
 @Service
 public class BookProducer {
 
     private final KafkaTemplate<String, Book> bookProducer;
 
-    public BookProducer(KafkaTemplate<String, Book> bookProducer){
+    public BookProducer(KafkaTemplate<String, Book> bookProducer) {
         this.bookProducer = bookProducer;
         produceMessages();
     }
 
     private void produceMessages() {
         new Thread(() -> {
-            for(;;) {
-                Utils.sleep(1_000);
-                this.send(getRandomBook());
-            }
+            Stream.generate(this::getRandomBook)
+                    .forEach((book) -> {
+                        Utils.sleep(1_000);
+                        this.send(book);
+                    });
         }).start();
     }
 
-    private Book getRandomBook(){
+    private Book getRandomBook() {
         int randomInt = Utils.random(0, books.size());
         return books.get(randomInt);
     }
 
     public void send(Book book) {
-        System.out.println("Sending " + book.toString());
-        bookProducer.send("book-message", book);
+        System.out.println("[BOOK-PRODUCER] Sending " + book.toString());
+        bookProducer.send("book-topic", book);
     }
 
     private List<Book> books = List.of(

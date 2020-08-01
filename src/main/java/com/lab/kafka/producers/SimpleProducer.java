@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@Profile("producer")
+@Profile("simple-producer")
 @Service
 public class SimpleProducer {
 
@@ -28,7 +28,7 @@ public class SimpleProducer {
     }
 
     public void send(String message) {
-        System.out.println("Sending " + message);
-        simpleProducer.send("simple-message", message);
+        System.out.println("[SIMPLE-PRODUCER] Sending " + message);
+        simpleProducer.send("simple-topic", message);
     }
 }
