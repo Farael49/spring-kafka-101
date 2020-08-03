@@ -27,7 +27,19 @@ Profiles:
 - book-producer: sends a message to book-topic as a Book Object (with json serialization)
 - book-consumer: reads a message from book-topic as a Book (with Json deserialization), and randomly fails to showcase the DLQ pattern.  Contains a second consumer to show the messages arriving in the DLQ.
 
-    
+# Quick note on Scaling & Order
+(Ordeeeeer https://www.youtube.com/watch?v=H4v7wddN-Wg )
+
+With our current configuration, we can run concurrent consumers instances up to the number of partitions we have on our Kafka topic (set on the docker-compose file).
+A full topic about running Kafka @scale would need a dedicated post, but it shows how simple it can be. 
+
+However, as these consumers are concurrent, exact message order can not be ensured. 
+If that's something we need -let's say we're updating entries based on these messages, the order matters to properly reflect the last modifications- the Producer needs to send a Key.
+- This key must be constant for the same entry as it's attributed to a specific partition
+- The keys must be distributed evenly across the partitions. This is also a task for the Producer, as the default partitioner uses a hash of the key to determine the partition to send the data to (round robin if no key). 
+
+
+
 #Sources:
 - https://www.baeldung.com/spring-kafka
 - https://github.com/spring-projects/spring-kafka/blob/master/samples/
