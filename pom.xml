@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>14</java.version>
-        <lombok.version>1.18.24</lombok.version>
+        <lombok.version>1.18.26</lombok.version>
         <jackson.version>2.13.4.2</jackson.version>
     </properties>
 
